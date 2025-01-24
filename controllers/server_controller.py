@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify,send_file
-from models import db, Server
+from models import db, rsaRedis,Server
 from services.server_services import createClient,get_ovpn
+from services.rsa_services import generate_rsa_key_pair,encrypt,decrypt
+from services.format_check import get_user_and_server_id,get_certificate
 server_bp = Blueprint('server_bp', __name__)
 
 @server_bp.route('/listServer', methods=['GET'])
@@ -44,12 +46,33 @@ def delete_server(id):
 @server_bp.route("/config",methods=['POST'])
 def get_config():
     data = request.json
-    server_id=data["server_id"]
-    request_time=data["request_time"]
-    time_encode=data["time_encode"]
-    server = Server.query.filter_by(id=server_id).first()
-    createClient(server.IP,request_time)
-    ovpn_file_path=get_ovpn(server.IP,request_time)
+    message=data["message"]
+    public_key=data["public_key"]
+    user=data["user"]
+    user_infor=rsaRedis.get_user(username=user)
+    private_key=user_infor["private_key"]
+    decryptMessage=decrypt(private_key,message)
+    print(decryptMessage)
+    result = get_user_and_server_id(decryptMessage)
+    if "error" in result:
+        return jsonify({"message":"can't get config file"}),404
+    print(result)
+    server = Server.query.filter_by(id=result["server_id"]).first()
+    print(server)
+    ovpn_file_path=get_ovpn(server.IP,result["user"])
+
     if(ovpn_file_path=="error"):
         return jsonify({'message':"full"}),404
-    return send_file(ovpn_file_path, as_attachment=True, download_name=f"{request_time}.ovpn")
+    try:
+        with open(ovpn_file_path, 'r') as file:
+            content = file.read()
+            print(content)
+            certificate=get_certificate(content).split("\n")[0]
+            encryptMessage=encrypt(public_key,certificate)
+            content=content.replace(certificate,"stringhasbeenencypt")
+        return jsonify({
+            "certificate":encryptMessage,
+            "config": content
+        })
+    except Exception as e:
+        return jsonify({"error": f"Error reading file: {str(e)}"}), 500
