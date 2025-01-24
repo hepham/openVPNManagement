@@ -73,6 +73,6 @@ def get_config():
         return jsonify({
             "certificate":encryptMessage,
             "config": content
-        })
+        }),200
     except Exception as e:
         return jsonify({"error": f"Error reading file: {str(e)}"}), 500
