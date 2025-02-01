@@ -23,56 +23,51 @@ def generate_client_config(client):
     The file includes the common configuration and inline <ca>, <cert>,
     <key>, and <tls-crypt> blocks.
     """
-    # Create a temporary file in /tmp
-    ovpn_temp = os.path.join("/tmp", f"{client}.ovpn")
-    with open(ovpn_temp, "w") as out:
-        # Include the common configuration file (client-common.txt)
-        if os.path.exists(CLIENT_COMMON):
-            with open(CLIENT_COMMON, "r") as f:
-                out.write(f.read())
-        else:
-            raise Exception(f"Common configuration file {CLIENT_COMMON} not found.")
+    ovpn_string = ""
+    
+    # Include the common configuration file (client-common.txt)
+    if os.path.exists(CLIENT_COMMON):
+        with open(CLIENT_COMMON, "r") as f:
+            ovpn_string += f.read()
+    else:
+        raise Exception(f"Common configuration file {CLIENT_COMMON} not found.")
 
-        # Append additional client-specific options
-        out.write("\nreneg-sec 0\n")
-        out.write("tls-client\n")
+    # Append additional client-specific options
+    ovpn_string += "\nreneg-sec 0\n"
+    ovpn_string += "tls-client\n"
 
-        # Insert the CA certificate
-        out.write("<ca>\n")
-        with open(CA_CERT, "r") as f:
-            out.write(f.read())
-        out.write("</ca>\n")
+    # Insert the CA certificate
+    ovpn_string += "<ca>\n"
+    with open(CA_CERT, "r") as f:
+        ovpn_string += f.read()
+    ovpn_string += "</ca>\n"
 
-        # Insert the client certificate (strip everything before the BEGIN line)
-        cert_file = os.path.join(ISSUED_DIR, f"{client}.crt")
-        out.write("<cert>\n")
-        with open(cert_file, "r") as f:
-            cert_content = f.read()
-            start = cert_content.find("-----BEGIN CERTIFICATE-----")
-            if start != -1:
-                out.write(cert_content[start:])
-            else:
-                out.write(cert_content)
-        out.write("</cert>\n")
+    # Insert the client certificate (strip everything before the BEGIN line)
+    cert_file = os.path.join(ISSUED_DIR, f"{client}.crt")
+    ovpn_string += "<cert>\n"
+    with open(cert_file, "r") as f:
+        cert_content = f.read()
+        start = cert_content.find("-----BEGIN CERTIFICATE-----")
+        ovpn_string += cert_content[start:] if start != -1 else cert_content
+    ovpn_string += "</cert>\n"
 
-        # Insert the client private key
-        key_file = os.path.join(PRIVATE_DIR, f"{client}.key")
-        out.write("<key>\n")
-        with open(key_file, "r") as f:
-            out.write(f.read())
-        out.write("</key>\n")
+    # Insert the client private key
+    key_file = os.path.join(PRIVATE_DIR, f"{client}.key")
+    ovpn_string += "<key>\n"
+    with open(key_file, "r") as f:
+        ovpn_string += f.read()
+    ovpn_string += "</key>\n"
 
-        # Insert the tls-crypt key block (strip header if needed)
-        out.write("<tls-crypt>\n")
-        with open(TC_KEY, "r") as f:
-            tc_content = f.read()
-            start = tc_content.find("-----BEGIN OpenVPN Static key")
-            if start != -1:
-                out.write(tc_content[start:])
-            else:
-                out.write(tc_content)
-        out.write("</tls-crypt>\n")
-    return ovpn_temp
+    # Insert the tls-crypt key block (strip header if needed)
+    ovpn_string += "<tls-crypt>\n"
+    with open(TC_KEY, "r") as f:
+        tc_content = f.read()
+        start = tc_content.find("-----BEGIN OpenVPN Static key")
+        ovpn_string += tc_content[start:] if start != -1 else tc_content
+    ovpn_string += "</tls-crypt>\n"
+
+    return ovpn_string
+
 
 @app.route("/create_client", methods=["POST"])
 def create_client():
@@ -110,12 +105,12 @@ def create_client():
         return jsonify({"error": f"Error generating OpenVPN config: {str(e)}"}), 500
 
     # Ensure the client directory exists and move the file there
-    os.makedirs(CLIENT_DIR, exist_ok=True)
-    final_path = os.path.join(CLIENT_DIR, f"{client}.ovpn")
-    shutil.move(ovpn_temp, final_path)
+    # os.makedirs(CLIENT_DIR, exist_ok=True)
+    # final_path = os.path.join(CLIENT_DIR, f"{client}.ovpn")
+    # shutil.move(ovpn_temp, final_path)
 
     # Return the .ovpn file as a downloadable attachment
-    return send_file(final_path, as_attachment=True)
+    return jsonify({"config":ovpn_temp}),200
 @app.route("/delete_client", methods=["POST"])
 def delete_client():
     client_name = request.json.get("client_name")
