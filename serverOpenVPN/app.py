@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from model import OpenVPNModel
+from models import OpenVPNModel
 
 app = Flask(__name__)
 

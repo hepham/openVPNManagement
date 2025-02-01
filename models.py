@@ -25,7 +25,7 @@ class RSARedis:
             "private_key": private_key
         }
         self.redis.hmset(key, user_data)
-        self.redis.expire(key, 86400)  # Hết hạn sau 1 ngày
+        self.redis.expire(key, 86400)
 
     def get_user(self, username):
         """Lấy thông tin user từ Redis."""

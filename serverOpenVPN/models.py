@@ -17,24 +17,20 @@ class OpenVPNModel:
         """Create an OpenVPN configuration file (.ovpn) for the given client."""
         ovpn_string = []
 
-        # Include the common configuration file (client-common.txt)
         if os.path.exists(OpenVPNModel.CLIENT_COMMON):
             with open(OpenVPNModel.CLIENT_COMMON, "r") as f:
                 ovpn_string.append(f.read())
         else:
             raise Exception(f"Common configuration file {OpenVPNModel.CLIENT_COMMON} not found.")
 
-        # Append additional client-specific options
         ovpn_string.append("reneg-sec 0")
         ovpn_string.append("tls-client")
 
-        # Insert the CA certificate
         ovpn_string.append("<ca>")
         with open(OpenVPNModel.CA_CERT, "r") as f:
             ovpn_string.append(f.read())
         ovpn_string.append("</ca>")
 
-        # Insert the client certificate
         cert_file = os.path.join(OpenVPNModel.ISSUED_DIR, f"{client}.crt")
         ovpn_string.append("<cert>")
         with open(cert_file, "r") as f:
@@ -43,7 +39,7 @@ class OpenVPNModel:
             ovpn_string.append(cert_content[start:] if start != -1 else cert_content)
         ovpn_string.append("</cert>")
 
-        # Insert the client private key
+
         key_file = os.path.join(OpenVPNModel.PRIVATE_DIR, f"{client}.key")
         ovpn_string.append("<key>")
         with open(key_file, "r") as f:
