@@ -23,50 +23,50 @@ def generate_client_config(client):
     The file includes the common configuration and inline <ca>, <cert>,
     <key>, and <tls-crypt> blocks.
     """
-    ovpn_string = ""
+    ovpn_string = []
     
     # Include the common configuration file (client-common.txt)
     if os.path.exists(CLIENT_COMMON):
         with open(CLIENT_COMMON, "r") as f:
-            ovpn_string += f.read()
+            ovpn_string.append(f.read())
     else:
         raise Exception(f"Common configuration file {CLIENT_COMMON} not found.")
 
     # Append additional client-specific options
-    ovpn_string += "\nreneg-sec 0\n"
-    ovpn_string += "tls-client\n"
+    ovpn_string.append("reneg-sec 0")
+    ovpn_string.append("tls-client")
 
     # Insert the CA certificate
-    ovpn_string += "<ca>\n"
+    ovpn_string.append("<ca>")
     with open(CA_CERT, "r") as f:
-        ovpn_string += f.read()
-    ovpn_string += "</ca>\n"
+        ovpn_string.append(f.read())
+    ovpn_string.append("</ca>")
 
     # Insert the client certificate (strip everything before the BEGIN line)
     cert_file = os.path.join(ISSUED_DIR, f"{client}.crt")
-    ovpn_string += "<cert>\n"
+    ovpn_string.append("<cert>")
     with open(cert_file, "r") as f:
         cert_content = f.read()
         start = cert_content.find("-----BEGIN CERTIFICATE-----")
-        ovpn_string += cert_content[start:] if start != -1 else cert_content
-    ovpn_string += "</cert>\n"
+        ovpn_string.append(cert_content[start:] if start != -1 else cert_content)
+    ovpn_string.append("</cert>")
 
     # Insert the client private key
     key_file = os.path.join(PRIVATE_DIR, f"{client}.key")
-    ovpn_string += "<key>\n"
+    ovpn_string.append("<key>")
     with open(key_file, "r") as f:
-        ovpn_string += f.read()
-    ovpn_string += "</key>\n"
+        ovpn_string.append(f.read())
+    ovpn_string.append("</key>")
 
     # Insert the tls-crypt key block (strip header if needed)
-    ovpn_string += "<tls-crypt>\n"
+    ovpn_string.append("<tls-crypt>")
     with open(TC_KEY, "r") as f:
         tc_content = f.read()
         start = tc_content.find("-----BEGIN OpenVPN Static key")
-        ovpn_string += tc_content[start:] if start != -1 else tc_content
-    ovpn_string += "</tls-crypt>\n"
+        ovpn_string.append(tc_content[start:] if start != -1 else tc_content)
+    ovpn_string.append("</tls-crypt>")
 
-    return ovpn_string
+    return "\n".join(ovpn_string)
 
 
 @app.route("/create_client", methods=["POST"])
