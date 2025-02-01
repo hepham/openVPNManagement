@@ -86,7 +86,11 @@ def create_client():
     # Check if a certificate for this client already exists
     cert_path = os.path.join(ISSUED_DIR, f"{client}.crt")
     if os.path.exists(cert_path):
-        return jsonify({"error": f"Client '{client}' already exists."}), 400
+        try:
+            ovpn_temp = generate_client_config(client)
+            return jsonify({"config":ovpn_temp}),200
+        except Exception as e:
+            return jsonify({"error": f"Error generating OpenVPN config: {str(e)}"}), 500
 
     # Create the client certificate using EasyRSA
     try:
@@ -104,10 +108,6 @@ def create_client():
     except Exception as e:
         return jsonify({"error": f"Error generating OpenVPN config: {str(e)}"}), 500
 
-    # Ensure the client directory exists and move the file there
-    # os.makedirs(CLIENT_DIR, exist_ok=True)
-    # final_path = os.path.join(CLIENT_DIR, f"{client}.ovpn")
-    # shutil.move(ovpn_temp, final_path)
 
     # Return the .ovpn file as a downloadable attachment
     return jsonify({"config":ovpn_temp}),200
