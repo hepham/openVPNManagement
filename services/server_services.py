@@ -11,18 +11,19 @@ def createClient(ipServer,username):
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
+    
 def get_ovpn(ipServer,username):
-    url = f"{ipServer}/get_ovpn/{username}"
-    print(f"url:{url}")
-    payload = {}
-    headers = {}
-
-    response = requests.request("GET", url, headers=headers, data=payload)
-    if response.status_code == 200:
-        temp_file = f"./ovpn/{username}.ovpn"
-        with open(temp_file, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=1024):
-                f.write(chunk)
-        return temp_file
-
+    url=f"{ipServer}/create_client"
+    payload = json.dumps({
+    "client_name": username
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+    response = requests.request("POST", url, headers=headers, data=payload)
+    if(response.status_code==200):
+        data=json.loads(response.text)
+        # print(data)
+        config = data["config"]
+        return config
     return "error"

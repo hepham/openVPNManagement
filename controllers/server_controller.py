@@ -104,18 +104,15 @@ def get_config():
     print(f"result:{result}")
     server = Server.query.filter_by(id=result["server_id"]).first()
     print(server)
-    createClient(server.IP,result["user"])
-    ovpn_file_path=get_ovpn(server.IP,result["user"])
-    print(f"opvnfile:{ovpn_file_path}")
-    if(ovpn_file_path=="error"):
+    ovpn_config=get_ovpn(server.IP,result["user"])
+    if(ovpn_config=="error"):
         return jsonify({'message':"full"}),404
     try:
-        with open(ovpn_file_path, 'r') as file:
-            content = file.read()
-            # print(content)
-            certificate=get_certificate(content).split("\n")[0]
-            encryptMessage=encrypt(public_key,certificate)
-            content=content.replace(certificate,"stringhasbeenencypt")
+
+        # print(content)
+        certificate=get_certificate(ovpn_config).split("\n")[0]
+        encryptMessage=encrypt(public_key,certificate)
+        content=content.replace(certificate,"stringhasbeenencypt")
         return jsonify({
             "certificate":encryptMessage,
             "config": content
