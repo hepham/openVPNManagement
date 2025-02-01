@@ -2,7 +2,7 @@ import redis
 
 class Config:
     REDIS_HOST = 'localhost'
-    REDIS_PORT = 6380
+    REDIS_PORT = 6379
     REDIS_DB = 0
     USER_SESSION_TIMEOUT = 3600  # Thời gian hết hạn phiên user (1 giờ)
 
