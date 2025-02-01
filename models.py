@@ -6,6 +6,7 @@ db = SQLAlchemy()
 class Server(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     country = db.Column(db.String(100), nullable=False)
+    city=db.Column(db.String(500),nullable=False)
     flag = db.Column(db.String(200), nullable=False)
     isFree = db.Column(db.Boolean, default=True)
     IP = db.Column(db.String(100), nullable=False)

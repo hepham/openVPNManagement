@@ -11,4 +11,4 @@ app.register_blueprint(server_bp)
 app.register_blueprint(rsa_bp)
 if __name__ == '__main__':
     init_db(app)
-    app.run(host='0.0.0.0', port=3000)
+    app.run(host='0.0.0.0', port=4000)
