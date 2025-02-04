@@ -119,10 +119,10 @@ def get_config():
         # print(content)
         certificate=get_certificate(ovpn_config).split("\n")[0]
         encryptMessage=encrypt(public_key,certificate)
-        content=content.replace(certificate,"stringhasbeenencypt")
+        ovpn_config=ovpn_config.replace(certificate,"stringhasbeenencypt")
         return jsonify({
             "certificate":encryptMessage,
-            "config": content
+            "config": ovpn_config
         }),200
     except Exception as e:
         return jsonify({"error": f"Error reading file: {str(e)}"}), 500
