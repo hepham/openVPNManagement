@@ -65,7 +65,8 @@ def add_server_list():
             city=server_data['city'],
             flag=server_data['flag'],
             isFree=server_data['isFree'],
-            IP=server_data['IP']
+            description=server_data['description'],
+            category=server_data["category"]
         )
         new_servers.append(new_server)
 
@@ -97,13 +98,10 @@ def get_config():
     user_infor=rsaRedis.get_user(username=user)
     private_key=user_infor["private_key"]
     decryptMessage=decrypt(private_key,message)
-    print(decryptMessage)
     result = get_user_and_server_id(decryptMessage)
     if "error" in result:
         return jsonify({"message":"can't get config file"}),404
-    print(f"result:{result}")
     server = Server.query.filter_by(id=result["server_id"]).first()
-    print(server)
     ovpn_config=get_ovpn(server.IP,result["user"])
     if(ovpn_config=="error"):
         return jsonify({'message':"full"}),404
