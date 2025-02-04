@@ -103,7 +103,10 @@ def get_config():
     user=data["user"]
     user_infor=rsaRedis.get_user(username=user)
     private_key=user_infor["private_key"]
-    decryptMessage=decrypt(private_key,message)
+    try:
+        decryptMessage=decrypt(private_key,message)
+    except:
+        return jsonify({"message":"error decrypt"}),500
     result = get_user_and_server_id(decryptMessage)
     if "error" in result:
         return jsonify({"message":"can't get config file"}),404
