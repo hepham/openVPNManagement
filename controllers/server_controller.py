@@ -15,7 +15,8 @@ def get_servers():
             'city':server.city,
             'flag': server.flag,
             'isFree': server.isFree,
-            'IP': server.IP
+            'category':server.category,
+            'description':server.description
         } for server in servers
     ])
 
@@ -29,10 +30,12 @@ def add_server():
 
     new_server = Server(
         country=data['country'],
-        city=data['city'],
-        flag=data['flag'],
-        isFree=data['isFree'],
-        IP=data['IP']
+            city=data['city'],
+            flag=data['flag'],
+            IP=data["IP"],
+            isFree=data['isFree'],
+            description=data['description'],
+            category=data["category"]
     )
     db.session.add(new_server)
     db.session.commit()
@@ -47,7 +50,7 @@ def add_server_list():
         return jsonify({'error': 'Data must be a list of servers'}), 400
 
     new_servers = []
-    required_fields = ['country', 'city', 'flag', 'isFree', 'IP']
+    required_fields = ['country', 'city', 'flag', 'isFree', 'IP',"description","category"]
 
     for server_data in data:
         # Verify that each server contains all required fields
@@ -64,10 +67,13 @@ def add_server_list():
             country=server_data['country'],
             city=server_data['city'],
             flag=server_data['flag'],
+            IP=server_data["IP"],
             isFree=server_data['isFree'],
             description=server_data['description'],
             category=server_data["category"]
         )
+        print(new_server)
+        
         new_servers.append(new_server)
 
     # Add the list of new servers to the database

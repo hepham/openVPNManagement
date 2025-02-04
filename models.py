@@ -10,9 +10,10 @@ class Server(db.Model):
     flag = db.Column(db.String(200), nullable=False)
     isFree = db.Column(db.Boolean, default=True)
     IP = db.Column(db.String(100), nullable=False)
-    description=db.Column(db.String(1000),nullable=True)
-    category=db.Column(db.String(1000),nullable=True)
-
+    description=db.Column(db.String(1000),nullable=False)
+    category=db.Column(db.String(1000),nullable=False)
+    def __str__(self):
+        return f"Server(id={self.id}, country={self.country}, city={self.city}, IP={self.IP}, isFree={self.isFree}, category={self.category},description={self.description})"
 
 class RSARedis:
     def __init__(self):
