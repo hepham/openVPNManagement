@@ -16,7 +16,8 @@ def get_servers():
             'flag': server.flag,
             'isFree': server.isFree,
             'category':server.category,
-            'description':server.description
+            'description':server.description,
+            "IP":server.IP
         } for server in servers
     ])
 
@@ -72,11 +73,10 @@ def add_server_list():
             description=server_data['description'],
             category=server_data["category"]
         )
-        print(new_server)
+        # print(new_server)
         
         new_servers.append(new_server)
 
-    # Add the list of new servers to the database
     try:
         for server in new_servers:
             db.session.add(server)
@@ -94,6 +94,45 @@ def delete_server(id):
     db.session.delete(server)
     db.session.commit()
     return jsonify({'message': 'Server deleted successfully'})
+
+@server_bp.route('/server/ip', methods=['DELETE'])
+def delete_server_by_ip():
+    data = request.json
+    ip = data.get('ip')
+    
+    if not ip:
+        return jsonify({'error': 'IP is required'}), 400
+        
+    server = Server.query.filter_by(IP=ip).first_or_404()
+    try:
+        db.session.delete(server)
+        db.session.commit()
+        return jsonify({'message': 'Server deleted successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@server_bp.route('/server/ip', methods=['PUT'])
+def update_server_ip():
+    data = request.json
+    old_ip = data.get('old_ip')
+    new_ip = data.get('new_ip')
+    
+    if not old_ip or not new_ip:
+        return jsonify({'error': 'Both old IP and new IP are required'}), 400
+
+    existing_server = Server.query.filter_by(IP=new_ip).first()
+    if existing_server:
+        return jsonify({'error': 'Server with new IP already exists'}), 400
+
+    server = Server.query.filter_by(IP=old_ip).first_or_404()
+    try:
+        server.IP = new_ip
+        db.session.commit()
+        return jsonify({'message': 'Server IP updated successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 @server_bp.route("/config",methods=['POST'])
 def get_config():
@@ -116,7 +155,6 @@ def get_config():
         return jsonify({'message':"full"}),404
     try:
 
-        # print(content)
         certificate=get_certificate(ovpn_config).split("\n")[0]
         encryptMessage=encrypt(public_key,certificate)
         ovpn_config=ovpn_config.replace(certificate,"stringhasbeenencypt")
