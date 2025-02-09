@@ -1,0 +1,15 @@
+# Ignore environment and SSL files
+.env
+ssl/
+*.pem
+
+# Python
+__pycache__/
+*.pyc
+
+# Database
+*.db
+
+# IDE
+.vscode/
+.idea/ 
