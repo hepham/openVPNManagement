@@ -13,7 +13,18 @@ server_bp = Blueprint('server_bp', __name__)
 @server_bp.route('/listServer', methods=['GET'])
 def get_servers():
     servers = Server.query.all()
-    server_list = [
+    server_list = _build_server_list(servers)
+    
+
+    server_list_json = json.dumps(server_list)
+    key = os.getenv("ENCRYPTION_KEY", "SMJUH41TkNyChU8c5kWPiA==")
+    encrypted_message = encrypt_with_aes(server_list_json, key)
+
+    return jsonify({"message": encrypted_message}), 200
+
+def _build_server_list(servers):
+    """Xây dựng danh sách server từ cơ sở dữ liệu."""
+    return [
         {
             'id': server.id,
             'country': server.country,
@@ -29,11 +40,6 @@ def get_servers():
             # "IP": server.IP
         } for server in servers
     ]
-    server_list_json = json.dumps(server_list)
-    key = os.getenv("ENCRYPTION_KEY", "SMJUH41TkNyChU8c5kWPiA==")  
-    encrypted_message = encrypt_with_aes(server_list_json, key)  
-
-    return jsonify({"message": encrypted_message}), 200
 
 @server_bp.route('/server', methods=['POST'])
 def add_server():

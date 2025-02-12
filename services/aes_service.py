@@ -19,10 +19,8 @@ def decrypt_with_aes(encrypted_data: str, key: str) -> str:
     key_bytes = key.encode('utf-8')
     cipher = AES.new(key_bytes, AES.MODE_ECB)
     
-    # Giải mã từ Base64 thành bytes
     encrypted_bytes = b64decode(encrypted_data)
     
-    # Giải mã dữ liệu và loại bỏ padding
     decrypted_padded = cipher.decrypt(encrypted_bytes)
     decrypted = unpad(decrypted_padded, AES.block_size)
     
@@ -34,23 +32,4 @@ def generate_random_string(length: int = 16) -> str:
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for _ in range(length))
 
-if __name__ == "__main__":
-    # Tạo khóa AES (mã hóa Base64)
-    key = "SMJUH41TkNyChU8c5kWPiA=="
-    # print("Generated Key:", key)
-    
-    # Dữ liệu cần mã hóa
-   
-    i=0
-    while(i<10000):
-    # Mã hóa dữ liệu
-        message = generate_random_string(10000)
-        encrypted = encrypt_with_aes(message, key)
-        # print( encrypted)
-        with open(f"test/{i}.txt","w")as f:
-            f.write(encrypted)
-        i+=1
-    
-    # # Giải mã dữ liệu
-    # decrypted = decrypt_with_aes(encrypted, key)
-    # print("Decrypted Data:", decrypted)
+
