@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, request, jsonify,send_file
 from models import db, rsaRedis,Server
 from services.server_services import createClient,get_ovpn
@@ -6,29 +7,33 @@ from services.format_check import get_user_and_server_id,get_certificate
 from services.aes_service import encrypt_with_aes
 from urllib.parse import urlparse
 from services.server_services import get_meta_data
+import json
 server_bp = Blueprint('server_bp', __name__)
 
 @server_bp.route('/listServer', methods=['GET'])
 def get_servers():
     servers = Server.query.all()
-    message=jsonify([
+    server_list = [
         {
             'id': server.id,
             'country': server.country,
-            'city':server.city,
+            'city': server.city,
             'flag': server.flag,
             'isFree': server.isFree,
-            'category':server.category,
-            'description':server.description,
-            'latitude':server.latitude,
-            'longitude':server.longitude,
-            'region':server.region,
-            'postal':server.postal
-            # "IP":server.IP
+            'category': server.category,
+            'description': server.description,
+            'latitude': server.latitude,
+            'longitude': server.longitude,
+            'region': server.region,
+            'postal': server.postal
+            # "IP": server.IP
         } for server in servers
-    ])
-    key = "SMJUH41TkNyChU8c5kWPiA=="
-    return encrypt_with_aes(message, key),200
+    ]
+    server_list_json = json.dumps(server_list)
+    key = os.getenv("ENCRYPTION_KEY", "SMJUH41TkNyChU8c5kWPiA==")  
+    encrypted_message = encrypt_with_aes(server_list_json, key)  
+
+    return jsonify({"message": encrypted_message}), 200
 
 @server_bp.route('/server', methods=['POST'])
 def add_server():
