@@ -33,7 +33,7 @@ def get_servers():
     key = os.getenv("ENCRYPTION_KEY", "SMJUH41TkNyChU8c5kWPiA==")  
     encrypted_message = encrypt_with_aes(server_list_json, key)  
 
-    return jsonify({"message": encrypted_message}), 200
+    return  encrypted_message, 200
 
 @server_bp.route('/server', methods=['POST'])
 def add_server():
