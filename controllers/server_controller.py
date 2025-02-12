@@ -3,12 +3,15 @@ from models import db, rsaRedis,Server
 from services.server_services import createClient,get_ovpn
 from services.rsa_services import generate_rsa_key_pair,encrypt,decrypt
 from services.format_check import get_user_and_server_id,get_certificate
+from services.aes_service import encrypt_with_aes
+from urllib.parse import urlparse
+from services.server_services import get_meta_data
 server_bp = Blueprint('server_bp', __name__)
 
 @server_bp.route('/listServer', methods=['GET'])
 def get_servers():
     servers = Server.query.all()
-    return jsonify([
+    message=jsonify([
         {
             'id': server.id,
             'country': server.country,
@@ -17,9 +20,15 @@ def get_servers():
             'isFree': server.isFree,
             'category':server.category,
             'description':server.description,
-            "IP":server.IP
+            'latitude':server.latitude,
+            'longitude':server.longitude,
+            'region':server.region,
+            'postal':server.postal
+            # "IP":server.IP
         } for server in servers
     ])
+    key = "SMJUH41TkNyChU8c5kWPiA=="
+    return encrypt_with_aes(message, key),200
 
 @server_bp.route('/server', methods=['POST'])
 def add_server():
@@ -28,15 +37,25 @@ def add_server():
 
     if existing_server:
         return jsonify({'error': 'Server with this IP already exists'}), 400
-
+    parsed_url = urlparse(data["IP"])
+    
+    ip_address = parsed_url.hostname
+    print(ip_address)
+    metadata=get_meta_data(ip_address)
+    if(metadata=="error"):
+        return jsonify({'error': 'problem get metadata'}), 400
     new_server = Server(
         country=data['country'],
-            city=data['city'],
-            flag=data['flag'],
-            IP=data["IP"],
-            isFree=data['isFree'],
-            description=data['description'],
-            category=data["category"]
+        city=data['city'],
+        flag=data['flag'],
+        IP=data["IP"],
+        isFree=data['isFree'],
+        description=data['description'],
+        category=data["category"],
+        latitude=metadata["latitude"],
+        longitude=metadata["longitude"],
+        region=metadata["region"],
+        postal=metadata["postal"]
     )
     db.session.add(new_server)
     db.session.commit()
@@ -64,6 +83,13 @@ def add_server_list():
             return jsonify({'error': f"Server with IP {server_data['IP']} already exists"}), 400
 
         # Create a new Server instance
+        parsed_url = urlparse(server_data["IP"])
+    
+        ip_address = parsed_url.hostname
+        print(ip_address)
+        metadata=get_meta_data(ip_address)
+        if(metadata=="error"):
+            return jsonify({'error': 'problem get metadata'}), 400
         new_server = Server(
             country=server_data['country'],
             city=server_data['city'],
@@ -71,7 +97,11 @@ def add_server_list():
             IP=server_data["IP"],
             isFree=server_data['isFree'],
             description=server_data['description'],
-            category=server_data["category"]
+            category=server_data["category"],
+            latitude=metadata["latitude"],
+            longitude=metadata["longitude"],
+            region=metadata["region"],
+            postal=metadata["postal"]
         )
         # print(new_server)
         

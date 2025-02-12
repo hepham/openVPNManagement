@@ -12,6 +12,10 @@ class Server(db.Model):
     IP = db.Column(db.String(100), nullable=False)
     description=db.Column(db.String(1000),nullable=False)
     category=db.Column(db.String(1000),nullable=False)
+    latitude=db.Column(db.String(1000),nullable=True)
+    longitude=db.Column(db.String(1000),nullable=True)
+    region=db.Column(db.String(1000),nullable=True)
+    postal=db.Column(db.String(1000),nullable=True)
     def __str__(self):
         return f"Server(id={self.id}, country={self.country}, city={self.city}, IP={self.IP}, isFree={self.isFree}, category={self.category},description={self.description})"
 

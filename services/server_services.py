@@ -27,3 +27,20 @@ def get_ovpn(ipServer,username):
         config = data["config"]
         return config
     return "error"
+
+def get_meta_data(ip):
+    metadata={}
+    url = f"https://ipinfo.io/{ip}/json"
+    payload = {}
+    headers = {}
+    response = requests.request("GET", url, headers=headers, data=payload)
+    if(response.status_code==200):
+        data=json.loads(response.text)
+        metadata["region"]=data["region"]
+        metadata["postal"]=data["postal"]
+        loc=data["loc"]
+        values=loc.split(",")
+        metadata["latitude"]=values[0]
+        metadata["longitude"]=values[1]
+        return metadata
+    return "error"
