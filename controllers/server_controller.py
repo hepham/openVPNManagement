@@ -1,26 +1,28 @@
 import os
-from flask import Blueprint, request, jsonify,send_file
-from models import db, rsaRedis,Server
-from services.server_services import createClient,get_ovpn
-from services.rsa_services import generate_rsa_key_pair,encrypt,decrypt
-from services.format_check import get_user_and_server_id,get_certificate
+from flask import Blueprint, request, jsonify, send_file
+from models import db, rsaRedis, Server
+from services.server_services import createClient, get_ovpn
+from services.rsa_services import generate_rsa_key_pair, encrypt, decrypt
+from services.format_check import get_user_and_server_id, get_certificate
 from services.aes_service import encrypt_with_aes
 from urllib.parse import urlparse
-from services.server_services import get_meta_data
+from services.server_services import get_meta_data, get_wg
 import json
+
 server_bp = Blueprint('server_bp', __name__)
+
 
 @server_bp.route('/listServer', methods=['GET'])
 def get_servers():
     servers = Server.query.all()
     server_list = _build_server_list(servers)
-    
 
     server_list_json = json.dumps(server_list)
     key = os.getenv("ENCRYPTION_KEY", "SMJUH41TkNyChU8c5kWPiA==")
     encrypted_message = encrypt_with_aes(server_list_json, key)
 
     return jsonify({"message": encrypted_message}), 200
+
 
 def _build_server_list(servers):
     """Xây dựng danh sách server từ cơ sở dữ liệu."""
@@ -41,6 +43,7 @@ def _build_server_list(servers):
         } for server in servers
     ]
 
+
 @server_bp.route('/server', methods=['POST'])
 def add_server():
     data = request.json
@@ -49,11 +52,11 @@ def add_server():
     if existing_server:
         return jsonify({'error': 'Server with this IP already exists'}), 400
     parsed_url = urlparse(data["IP"])
-    
+
     ip_address = parsed_url.hostname
     print(ip_address)
-    metadata=get_meta_data(ip_address)
-    if(metadata=="error"):
+    metadata = get_meta_data(ip_address)
+    if (metadata == "error"):
         return jsonify({'error': 'problem get metadata'}), 400
     new_server = Server(
         country=data['country'],
@@ -73,7 +76,6 @@ def add_server():
     return jsonify({'message': 'Server added successfully'}), 201
 
 
-
 @server_bp.route('/server/list', methods=['POST'])
 def add_server_list():
     data = request.json
@@ -83,7 +85,7 @@ def add_server_list():
         return jsonify({'error': 'Data must be a list of servers'}), 400
 
     new_servers = []
-    required_fields = ['country', 'city', 'flag', 'isFree', 'IP',"description","category"]
+    required_fields = ['country', 'city', 'flag', 'isFree', 'IP', "description", "category"]
 
     for server_data in data:
         # Verify that each server contains all required fields
@@ -97,11 +99,11 @@ def add_server_list():
 
         # Create a new Server instance
         parsed_url = urlparse(server_data["IP"])
-    
+
         ip_address = parsed_url.hostname
         print(ip_address)
-        metadata=get_meta_data(ip_address)
-        if(metadata=="error"):
+        metadata = get_meta_data(ip_address)
+        if (metadata == "error"):
             return jsonify({'error': 'problem get metadata'}), 400
         new_server = Server(
             country=server_data['country'],
@@ -117,7 +119,7 @@ def add_server_list():
             postal=metadata["postal"]
         )
         # print(new_server)
-        
+
         new_servers.append(new_server)
 
     try:
@@ -130,7 +132,6 @@ def add_server_list():
         return jsonify({'error': str(e)}), 500
 
 
-
 @server_bp.route('/server/<int:id>', methods=['DELETE'])
 def delete_server(id):
     server = Server.query.get_or_404(id)
@@ -138,14 +139,15 @@ def delete_server(id):
     db.session.commit()
     return jsonify({'message': 'Server deleted successfully'})
 
+
 @server_bp.route('/server/ip', methods=['DELETE'])
 def delete_server_by_ip():
     data = request.json
     ip = data.get('ip')
-    
+
     if not ip:
         return jsonify({'error': 'IP is required'}), 400
-        
+
     server = Server.query.filter_by(IP=ip).first_or_404()
     try:
         db.session.delete(server)
@@ -155,12 +157,13 @@ def delete_server_by_ip():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+
 @server_bp.route('/server/ip', methods=['PUT'])
 def update_server_ip():
     data = request.json
     old_ip = data.get('old_ip')
     new_ip = data.get('new_ip')
-    
+
     if not old_ip or not new_ip:
         return jsonify({'error': 'Both old IP and new IP are required'}), 400
 
@@ -177,43 +180,46 @@ def update_server_ip():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-@server_bp.route("/config",methods=['POST'])
+
+@server_bp.route("/config", methods=['POST'])
 def get_config():
     data = request.json
-    message=data["message"]
-    public_key=data["public_key"]
-    user=data["user"]
-    user_infor=rsaRedis.get_user(username=user)
-    private_key=user_infor["private_key"]
+    message = data["message"]
+    public_key = data["public_key"]
+    user = data["user"]
+    user_infor = rsaRedis.get_user(username=user)
+    private_key = user_infor["private_key"]
     try:
-        decryptMessage=decrypt(private_key,message)
+        decryptMessage = decrypt(private_key, message)
     except:
-        return jsonify({"message":"error decrypt"}),500
+        return jsonify({"message": "error decrypt"}), 500
     result = get_user_and_server_id(decryptMessage)
     if "error" in result:
-        return jsonify({"message":"can't get config file"}),404
+        return jsonify({"message": "can't get config file"}), 404
     server = Server.query.filter_by(id=result["server_id"]).first()
-    ovpn_config=get_ovpn(server.IP,result["user"])
-    if(ovpn_config=="error"):
-        return jsonify({'message':"full"}),404
+    ovpn_config = get_ovpn(server.IP, result["user"])
+    if (ovpn_config == "error"):
+        return jsonify({'message': "full"}), 404
     try:
 
-        certificate=get_certificate(ovpn_config).split("\n")[0]
-        encryptMessage=encrypt(public_key,certificate)
-        ovpn_config=ovpn_config.replace(certificate,"stringhasbeenencypt")
+        certificate = get_certificate(ovpn_config).split("\n")[0]
+        encryptMessage = encrypt(public_key, certificate)
+        ovpn_config = ovpn_config.replace(certificate, "stringhasbeenencypt")
         return jsonify({
-            "certificate":encryptMessage,
+            "certificate": encryptMessage,
             "config": ovpn_config
-        }),200
+        }), 200
     except Exception as e:
         return jsonify({"error": f"Error reading file: {str(e)}"}), 500
-@server_bp.route("/config_wg",methods=['POST'])
+
+
+@server_bp.route("/config_wg", methods=['POST'])
 def get_config_wg():
     data = request.json
-    user=data["user"]
-    config=get_wg("3.139.103.95",user)
-    if(config=="error"):
-        return jsonify({'message':"full"}),404
+    user = data["user"]
+    config = get_wg("3.139.103.95", user)
+    if (config == "error"):
+        return jsonify({'message': "full"}), 404
     return jsonify({
         "config": config
-    }),200
+    }), 200
