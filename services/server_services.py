@@ -44,3 +44,20 @@ def get_meta_data(ip):
         metadata["longitude"]=values[1]
         return metadata
     return "error"
+def get_wg(ipServer,username):
+    url = f"http://{ipServer}:51821/api/wireguard/client"
+
+    headers = {
+    'Cookie': 'connect.sid=s%3AHhzpWlSMeWXduBfBjzyflOTeOLxUjQQM.7ME8c5A%2BvdHIKNXM%2B2wl9%2Fhpk00hEBjb6th1nkSdYwg',
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+    if(response.status_code==200):
+        data=json.loads(response.text)
+        for client in data:
+            if(client["name"]==username):
+                response = requests.request("GET", url, headers=headers, data=payload)
+                return response.text
+
+    return "error"

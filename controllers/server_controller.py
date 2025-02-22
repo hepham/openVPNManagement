@@ -72,6 +72,8 @@ def add_server():
     db.session.commit()
     return jsonify({'message': 'Server added successfully'}), 201
 
+
+
 @server_bp.route('/server/list', methods=['POST'])
 def add_server_list():
     data = request.json
@@ -205,3 +207,13 @@ def get_config():
         }),200
     except Exception as e:
         return jsonify({"error": f"Error reading file: {str(e)}"}), 500
+@server_bp.route("/config_wg",methods=['POST'])
+def get_config_wg():
+    data = request.json
+    user=data["user"]
+    config=get_wg("3.139.103.95",user)
+    if(config=="error"):
+        return jsonify({'message':"full"}),404
+    return jsonify({
+        "config": config
+    }),200
