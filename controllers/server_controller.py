@@ -16,6 +16,7 @@ def get_servers():
     server_list = [
         {
             'id': server.id,
+            #'IP':server.IP,
             'country': server.country,
             'city': server.city,
             'flag': server.flag,
@@ -30,7 +31,9 @@ def get_servers():
         } for server in servers
     ]
     server_list_json = json.dumps(server_list)
+    #print(server_list_json)
     key = os.getenv("ENCRYPTION_KEY", "SMJUH41TkNyChU8c5kWPiA==")  
+    
     encrypted_message = encrypt_with_aes(server_list_json, key)  
 
     return jsonify({"message": encrypted_message}), 200
@@ -185,7 +188,12 @@ def get_config():
     if "error" in result:
         return jsonify({"message":"can't get config file"}),404
     server = Server.query.filter_by(id=result["server_id"]).first()
-    ovpn_config=get_ovpn(server.IP,result["user"])
+    
+    try:
+        ovpn_config=get_ovpn(server.IP,result["user"])
+    except:
+        return jsonify({"message":"server down"}),503
+
     if(ovpn_config=="error"):
         return jsonify({'message':"full"}),404
     try:
