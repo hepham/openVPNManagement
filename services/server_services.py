@@ -61,7 +61,16 @@ def get_wg(ipServer, username):
     payload = json.dumps({
         "name": username
     })
-    requests.request("POST", url, headers=headers, data=payload)
+    response = requests.request("GET", url, headers=headers)
+    check=False
+    if(response.status_code == 200):
+        data = json.loads(response.text)
+        for client in data:
+            if(client["name"] == username):
+                check=True
+                break
+    if(check==False):
+        requests.request("POST", url, headers=headers, data=payload)
 
     response = requests.request("GET", url, headers=headers)
     if (response.status_code == 200):
