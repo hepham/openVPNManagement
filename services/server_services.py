@@ -68,7 +68,7 @@ def get_wg(ipServer, username):
         data = json.loads(response.text)
         for client in data:
             if (client["name"] == username):
-                url = f"http://{ipServer}:51821/api/wireguard/client/{client["id"]}/configuration"
+                url = f"http://{ipServer}:51821/api/wireguard/client/{client['id']}/configuration"
                 response = requests.request("GET", url, headers=headers)
                 print(response.text)
                 return response.text

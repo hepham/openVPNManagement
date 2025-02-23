@@ -43,14 +43,14 @@ def _build_server_list(servers):
             # "IP": server.IP
         } for server in servers
     ]
-<<<<<<< HEAD
+
     server_list_json = json.dumps(server_list)
     #print(server_list_json)
     key = os.getenv("ENCRYPTION_KEY", "SMJUH41TkNyChU8c5kWPiA==")  
     
     encrypted_message = encrypt_with_aes(server_list_json, key)  
-=======
->>>>>>> d96023926dc83e698d6cb767d1a57d1767b6403e
+
+
 
 
 @server_bp.route('/server', methods=['POST'])
