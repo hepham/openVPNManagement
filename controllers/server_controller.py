@@ -205,18 +205,8 @@ def get_config():
     wireguard_config=""
     try:
         wireguard_config=get_wireguard(server.IP,result["user"])
-    except Exception as e:
-        print({"message": str(e)})
-        return jsonify({"message":"server down"}),503
-
-    if(wireguard_config=="error"):
-        return jsonify({'message':"full"}),404
-
-
-
-
-
-    try:
+        if(wireguard_config=="error"):
+            return jsonify({'message':"full"}),404
         private_key_line = re.search(r'(PrivateKey\s*=\s*[^\n]+)', wireguard_config).group(1)
         address_line = re.search(r'(Address\s*=\s*[^\n]+)', wireguard_config).group(1)
         DNS_line = re.search(r'(DNS\s*=\s*[^\n]+)', wireguard_config).group(1)
@@ -242,5 +232,6 @@ encryptMessage2
             "config": wireguard_config
         }), 200
     except Exception as e:
-        return jsonify({"error": f"Error reading file: {str(e)}"}), 500
+        print({"message": str(e)})
+        return jsonify({"message":"server down"}),503
 
