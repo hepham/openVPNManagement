@@ -215,7 +215,7 @@ def get_config():
         AllowedIPs_line=re.search(r'(AllowedIPs\s*=\s*[^\n]+)', wireguard_config).group(1)
         PersistentKeepalive=re.search(r'(PersistentKeepalive\s*=\s*[^\n]+)', wireguard_config).group(1)
         encryptMessage1=encrypt(public_key,f"{private_key_line}\n{address_line}")
-        encryptMessage2=encrypt(public_key,f"{public_key_line}\n{public_key_line}")
+        encryptMessage2=encrypt(public_key,f"{public_key_line}\n{endpoint_line}")
         encryptMessage = f"{encryptMessage1}\t{encryptMessage2}"
         wireguard_config = f"""
         [Interface]
@@ -223,7 +223,6 @@ encryptMessage1
 {DNS_line}
 [Peer]
 encryptMessage2
-{endpoint_line}
 {AllowedIPs_line}
 {PersistentKeepalive}
         """
