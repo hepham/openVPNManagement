@@ -16,11 +16,11 @@ server_bp = Blueprint('server_bp', __name__)
 def get_servers():
     servers = Server.query.all()
     server_list = _build_server_list(servers)
-    print("server_list:",server_list)
+    # print("server_list:",server_list)
     server_list_json = json.dumps(server_list)
     key = os.getenv("ENCRYPTION_KEY", "SMJUH41TkNyChU8c5kWPiA==")
     encrypted_message = encrypt_with_aes(server_list_json, key)
-    print("encrypted_message:",encrypted_message)
+    # print("encrypted_message:",encrypted_message)
     return jsonify({"message": encrypted_message}), 200
 
 
@@ -205,7 +205,8 @@ def get_config():
     
     try:
         wireguard_config=get_wireguard(server.IP,result["user"])
-    except:
+    except Exception as e:
+        print({"message": str(e)})
         return jsonify({"message":"server down"}),503
 
     if(wireguard_config=="error"):
