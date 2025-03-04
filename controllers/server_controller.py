@@ -202,7 +202,7 @@ def get_config():
         return jsonify({"message": "can't get config file"}), 404
     server = Server.query.filter_by(id=result["server_id"]).first()
 
-    
+    wireguard_config=""
     try:
         wireguard_config=get_wireguard(server.IP,result["user"])
     except Exception as e:
@@ -233,6 +233,7 @@ encryptMessage1
 {DNS_line}
 [Peer]
 encryptMessage2
+{endpoint_line}
 {AllowedIPs_line}
 {PersistentKeepalive}
         """
