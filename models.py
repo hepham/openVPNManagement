@@ -47,7 +47,7 @@ class RSARedis:
         keys = self.redis.keys("vpn_user:*")
         users = []
         for key in keys:
-            users.append(self.redis.hgetall(key))
+            users.append(self.redis.getall(key))
         return users
 
 def init_db(app):

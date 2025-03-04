@@ -8,7 +8,7 @@ from services.aes_service import encrypt_with_aes
 from urllib.parse import urlparse
 from services.server_services import get_meta_data, get_wg
 import json
-
+import re
 server_bp = Blueprint('server_bp', __name__)
 
 
@@ -221,10 +221,25 @@ def get_config():
 
 
     try:
-
-        certificate = get_certificate(wireguard_config).split("\n")[0]
-        encryptMessage = encrypt(public_key, certificate)
-        wireguard_config = wireguard_config.replace(certificate, "stringhasbeenencypt")
+        private_key_line = re.search(r'(PrivateKey\s*=\s*[^\n]+)', wireguard_config).group(1)
+        address_line = re.search(r'(Address\s*=\s*[^\n]+)', wireguard_config).group(1)
+        DNS_line = re.search(r'(DNS\s*=\s*[^\n]+)', wireguard_config).group(1)
+        public_key_line = re.search(r'(PublicKey\s*=\s*[^\n]+)', wireguard_config).group(1)
+        endpoint_line = re.search(r'(Endpoint\s*=\s*[^\n]+)', wireguard_config).group(1)
+        AllowedIPs_line=re.search(r'(AllowedIPs\s*=\s*[^\n]+)', wireguard_config).group(1)
+        PersistentKeepalive=re.search(r'(PersistentKeepalive\s*=\s*[^\n]+)', wireguard_config).group(1)
+        encryptMessage1=encrypt(public_key,f"{private_key_line}\n{address_line}")
+        encryptMessage2=encrypt(public_key,f"{public_key_line}\n{public_key_line}")
+        encryptMessage = f"{encrypt(public_key, encryptMessage1)}\t{encrypt(public_key, encryptMessage2)}"
+        wireguard_config = f"""
+        [Interface]
+encryptMessage1
+{DNS_line}
+[Peer]
+encryptMessage2
+{AllowedIPs_line}
+{PersistentKeepalive}
+        """
         return jsonify({
             "certificate": encryptMessage,
             "config": wireguard_config
