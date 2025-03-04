@@ -1,7 +1,7 @@
 import os
 from flask import Blueprint, request, jsonify, send_file
 from models import db, rsaRedis, Server
-from services.server_services import createClient, get_ovpn
+from services.server_services import createClient, get_wireguard
 from services.rsa_services import generate_rsa_key_pair, encrypt, decrypt
 from services.format_check import get_user_and_server_id, get_certificate
 from services.aes_service import encrypt_with_aes
@@ -209,11 +209,11 @@ def get_config():
 
     
     try:
-        ovpn_config=get_ovpn(server.IP,result["user"])
+        wireguard_config=get_wireguard(server.IP,result["user"])
     except:
         return jsonify({"message":"server down"}),503
 
-    if(ovpn_config=="error"):
+    if(wireguard_config=="error"):
         return jsonify({'message':"full"}),404
 
 
@@ -222,27 +222,13 @@ def get_config():
 
     try:
 
-        certificate = get_certificate(ovpn_config).split("\n")[0]
+        certificate = get_certificate(wireguard_config).split("\n")[0]
         encryptMessage = encrypt(public_key, certificate)
-        ovpn_config = ovpn_config.replace(certificate, "stringhasbeenencypt")
+        wireguard_config = wireguard_config.replace(certificate, "stringhasbeenencypt")
         return jsonify({
             "certificate": encryptMessage,
-            "config": ovpn_config
+            "config": wireguard_config
         }), 200
     except Exception as e:
         return jsonify({"error": f"Error reading file: {str(e)}"}), 500
-
-
-
-
-@server_bp.route("/config_wg", methods=['POST'])
-def get_config_wg():
-    data = request.json
-    user = data["user"]
-    config = get_wg("3.139.103.95", user)
-    if (config == "error"):
-        return jsonify({'message': "full"}), 404
-    return jsonify({
-        "config": config
-    }), 200
 

@@ -15,22 +15,27 @@ def createClient(ipServer, username):
     response = requests.request("POST", url, headers=headers, data=payload)
 
 
-def get_ovpn(ipServer, username):
-    url = f"{ipServer}/create_client"
-    payload = json.dumps({
-        "client_name": username
-    })
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    response = requests.request("POST", url, headers=headers, data=payload)
-    if (response.status_code == 200):
-        data = json.loads(response.text)
-        # print(data)
-        config = data["config"]
-        return config
-    return "error"
+def get_wireguard(ipServer, username):
+    
+    url = f"{ipServer}/auth"
 
+    payload = {'password': 'admin',
+    'username': 'admin'}
+
+    session = requests.Session()  # Tạo session để duy trì cookie
+    response = session.post(url, data=payload)
+    print(session.cookies.get_dict())
+
+    if response.status_code == 200:
+
+        url = "{ipServer}/create_client/wg0"
+        payload = json.dumps({
+        "name": f"{username}"
+        })
+        
+        response = session.request("POST", url,headers={'Content-Type': 'application/json'},data=payload)
+        if (response.status_code == 200):
+            return response.text
 
 def get_meta_data(ip):
     metadata = {}
