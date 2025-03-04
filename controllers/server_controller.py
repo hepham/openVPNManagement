@@ -216,7 +216,7 @@ def get_config():
         PersistentKeepalive=re.search(r'(PersistentKeepalive\s*=\s*[^\n]+)', wireguard_config).group(1)
         encryptMessage1=encrypt(public_key,f"{private_key_line}\n{address_line}")
         encryptMessage2=encrypt(public_key,f"{public_key_line}\n{public_key_line}")
-        encryptMessage = f"{encrypt(public_key, encryptMessage1)}\t{encrypt(public_key, encryptMessage2)}"
+        encryptMessage = f"{encryptMessage1}\t{encryptMessage2}"
         wireguard_config = f"""
         [Interface]
 encryptMessage1
