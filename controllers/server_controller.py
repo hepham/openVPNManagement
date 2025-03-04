@@ -6,7 +6,7 @@ from services.rsa_services import generate_rsa_key_pair, encrypt, decrypt
 from services.format_check import get_user_and_server_id, get_certificate
 from services.aes_service import encrypt_with_aes
 from urllib.parse import urlparse
-from services.server_services import get_meta_data, get_wg
+from services.server_services import get_meta_data
 import json
 import re
 server_bp = Blueprint('server_bp', __name__)
