@@ -28,7 +28,7 @@ def get_wireguard(ipServer, username):
 
     if response.status_code == 200:
 
-        url = "{ipServer}/create_client/wg0"
+        url = f"{ipServer}/create_client/wg0"
         payload = json.dumps({
         "name": f"{username}"
         })
