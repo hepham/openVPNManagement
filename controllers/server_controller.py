@@ -26,10 +26,11 @@ def get_servers():
 
 def _build_server_list(servers):
     """Xây dựng danh sách server từ cơ sở dữ liệu."""
+    
     return [
         {
             'id': server.id,
-            #'IP':server.IP,
+            'IP':server.ipAddress,
             'country': server.country,
             'city': server.city,
             'flag': server.flag,
@@ -63,7 +64,7 @@ def add_server():
     if (metadata == "error"):
         return jsonify({'error': 'problem get metadata'}), 400
     new_server = Server(
-        country=data['country'],
+        country=metadata['country'],
         city=data['city'],
         flag=data['flag'],
         IP=data["IP"],
@@ -73,7 +74,8 @@ def add_server():
         latitude=metadata["latitude"],
         longitude=metadata["longitude"],
         region=metadata["region"],
-        postal=metadata["postal"]
+        postal=metadata["postal"],
+        ipAddress=ip_address
     )
     db.session.add(new_server)
     db.session.commit()
@@ -89,7 +91,7 @@ def add_server_list():
         return jsonify({'error': 'Data must be a list of servers'}), 400
 
     new_servers = []
-    required_fields = ['country', 'city', 'flag', 'isFree', 'IP', "description", "category"]
+    required_fields = [ 'flag', 'isFree', 'IP', "description", "category"]
 
     for server_data in data:
         # Verify that each server contains all required fields
@@ -110,8 +112,8 @@ def add_server_list():
         if (metadata == "error"):
             return jsonify({'error': 'problem get metadata'}), 400
         new_server = Server(
-            country=server_data['country'],
-            city=server_data['city'],
+            country=metadata['country'],
+            city=metadata['city'],
             flag=server_data['flag'],
             IP=server_data["IP"],
             isFree=server_data['isFree'],
@@ -120,7 +122,8 @@ def add_server_list():
             latitude=metadata["latitude"],
             longitude=metadata["longitude"],
             region=metadata["region"],
-            postal=metadata["postal"]
+            postal=metadata["postal"],
+            ipAddress=ip_address
         )
         # print(new_server)
 
@@ -199,14 +202,14 @@ def get_config():
         return jsonify({"message": "error decrypt"}), 500
     result = get_user_and_server_id(decryptMessage)
     if "error" in result:
-        return jsonify({"message": "can't get config file"}), 404
+        return jsonify({"message": "bad request"}), 400
     server = Server.query.filter_by(id=result["server_id"]).first()
 
     wireguard_config=""
     try:
         wireguard_config=get_wireguard(server.IP,result["user"])
         if(wireguard_config=="error"):
-            return jsonify({'message':"full"}),404
+            return jsonify({'message':"full"}),503
         private_key_line = re.search(r'(PrivateKey\s*=\s*[^\n]+)', wireguard_config).group(1)
         address_line = re.search(r'(Address\s*=\s*[^\n]+)', wireguard_config).group(1)
         DNS_line = re.search(r'(DNS\s*=\s*[^\n]+)', wireguard_config).group(1)

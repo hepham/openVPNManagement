@@ -40,18 +40,19 @@ def get_wireguard(ipServer, username):
 
 def get_meta_data(ip):
     metadata = {}
-    url = f"https://ipinfo.io/{ip}/json"
+    url = f"http://ip-api.com/json/{ip}"
     payload = {}
     headers = {}
     response = requests.request("GET", url, headers=headers, data=payload)
     if (response.status_code == 200):
         data = json.loads(response.text)
-        metadata["region"] = data["region"]
-        metadata["postal"] = data["postal"]
-        loc = data["loc"]
-        values = loc.split(",")
-        metadata["latitude"] = values[0]
-        metadata["longitude"] = values[1]
+        metadata["region"] = data["regionName"]
+        metadata["postal"] = data["zip"]
+        metadata["latitude"] = data["lat"]
+        metadata["longitude"] = data["lon"]
+        metadata["country"] =data["country"]
+        metadata["city"]=data["city"]
+        
         return metadata
     return "error"
 

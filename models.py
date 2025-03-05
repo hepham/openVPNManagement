@@ -16,8 +16,9 @@ class Server(db.Model):
     longitude=db.Column(db.String(1000),nullable=True)
     region=db.Column(db.String(1000),nullable=True)
     postal=db.Column(db.String(1000),nullable=True)
+    ipAddress=db.Column(db.String(20),nullable=True)
     def __str__(self):
-        return f"Server(id={self.id}, country={self.country}, city={self.city}, IP={self.IP}, isFree={self.isFree}, category={self.category},description={self.description})"
+        return f"Server(id={self.id}, country={self.country}, city={self.city}, IP={self.IP}, isFree={self.isFree}, category={self.category},description={self.description}),ipAddress={self.ipAddress}"
 
 class RSARedis:
     def __init__(self):
