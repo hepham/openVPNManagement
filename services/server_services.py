@@ -17,25 +17,25 @@ def createClient(ipServer, username):
 
 def get_wireguard(ipServer, username):
     
-    url = f"{ipServer}/auth"
+    # url = f"{ipServer}/auth"
 
-    payload = {'password': 'admin',
-    'username': 'admin'}
+    # payload = {'password': 'admin',
+    # 'username': 'admin'}
 
-    session = requests.Session()  # Tạo session để duy trì cookie
-    response = session.post(url, data=payload)
-    print(session.cookies.get_dict())
+    # session = requests.Session()  # Tạo session để duy trì cookie
+    # response = session.post(url, data=payload)
+    # print(session.cookies.get_dict())
 
-    if response.status_code == 200:
+    # if response.status_code == 200:
 
-        url = f"{ipServer}/create_client/wg0"
-        payload = json.dumps({
-        "name": f"{username}"
-        })
+    url = f"{ipServer}/create_client/wg0"
+    payload = json.dumps({
+    "name": f"{username}"
+    })
         
-        response = session.request("POST", url,headers={'Content-Type': 'application/json'},data=payload)
-        if (response.status_code == 200):
-            return response.text
+    response = requests.request("POST", url,headers={'Content-Type': 'application/json'},data=payload)
+    if (response.status_code == 200):
+        return response.text
     return "error"
 
 def get_meta_data(ip):
