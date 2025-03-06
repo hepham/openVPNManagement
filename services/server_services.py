@@ -1,6 +1,10 @@
 import requests
 import json
+import pycountry
 
+def get_country_name(country_code):
+    country = pycountry.countries.get(alpha_2=country_code.upper())
+    return country.name if country else "Unknown Country"
 
 def createClient(ipServer, username):
     url = f"{ipServer}/add_user"
@@ -40,19 +44,20 @@ def get_wireguard(ipServer, username):
 
 def get_meta_data(ip):
     metadata = {}
-    url = f"http://ip-api.com/json/{ip}"
+    url = f"https://ipinfo.io/{ip}/json"
     payload = {}
     headers = {}
     response = requests.request("GET", url, headers=headers, data=payload)
     if (response.status_code == 200):
         data = json.loads(response.text)
-        metadata["region"] = data["regionName"]
-        metadata["postal"] = data["zip"]
-        metadata["latitude"] = data["lat"]
-        metadata["longitude"] = data["lon"]
-        metadata["country"] =data["country"]
+        metadata["region"] = data["region"]
+        metadata["postal"] = data["postal"]
+        loc = data["loc"]
+        values = loc.split(",")
+        metadata["latitude"] = values[0]
+        metadata["longitude"] = values[1]
+        metadata["country"] =get_country_name(data["country"])
         metadata["city"]=data["city"]
-        
         return metadata
     return "error"
 
