@@ -5,3 +5,4 @@ requests
 cryptography
 gunicorn 
 pycryptodome
+pycountry
