@@ -54,6 +54,24 @@ When you want to stop the services, you can use the following command:
 ```bash
 docker-compose down
 ```
+## Running the Application Directly
 
+### Option 1: Running with Python
+If you prefer to run the application directly using Python, you can do so with the following command:
+
+```bash
+python wsgi.py
+```
+
+- This will start the Flask application on the default port (usually 4000).
+
+### Option 2: Running with Gunicorn
+To run the application using Gunicorn, you can use the following command:
+
+```bash
+gunicorn --bind 0.0.0.0:4000 wsgi:app
+```
+
+- This will start the application on port 4000.
 ## Conclusion
 The openVPNManagement project provides an easy way to set up and manage OpenVPN servers. Follow the steps above to get the project up and running. If you encounter any issues, check the logs or refer to the official documentation for Docker.
