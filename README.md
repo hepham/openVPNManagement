@@ -1,77 +1,127 @@
-# Guide to Running the openVPNManagement Project
+# Hướng dẫn Chạy Dự án OpenVPN Management
 
-## Introduction
-The openVPNManagement project is designed to efficiently manage OpenVPN servers. It provides a user-friendly interface and tools to facilitate the management of multiple OpenVPN instances. This guide will help you install and run the project using Docker, ensuring a smooth setup process.
+## Giới thiệu
+Dự án OpenVPN Management được thiết kế để quản lý hiệu quả các máy chủ OpenVPN. Nó cung cấp giao diện thân thiện với người dùng và các công cụ để tạo điều kiện quản lý nhiều phiên bản OpenVPN. Hướng dẫn này sẽ giúp bạn cài đặt và chạy dự án bằng Docker, đảm bảo quá trình thiết lập suôn sẻ.
+# Hướng dẫn Chạy Dự án OpenVPN Management
 
-## System Requirements
-Before you begin, ensure that you have the following software installed:
-- **Docker**: Latest version.
-- **Docker Compose**: Latest version.
+## Giới thiệu
+Dự án OpenVPN Management được thiết kế để quản lý hiệu quả các máy chủ OpenVPN. Nó cung cấp giao diện thân thiện với người dùng và các công cụ để tạo điều kiện quản lý nhiều phiên bản OpenVPN. Hướng dẫn này sẽ giúp bạn cài đặt và chạy dự án bằng Docker, đảm bảo quá trình thiết lập suôn sẻ.
 
-## Project Structure
-The project includes the following files and directories:
-- `docker-compose.yml`: Configuration file for Docker Compose.
-- `Dockerfile`: Configuration file to build the Docker image for the application.
+## Yêu cầu Hệ thống
+Trước khi bắt đầu, hãy đảm bảo bạn đã cài đặt các phần mềm sau:
+- **Docker**: Phiên bản mới nhất
+- **Docker Compose**: Phiên bản mới nhất
+## Yêu cầu Hệ thống
+Trước khi bắt đầu, hãy đảm bảo bạn đã cài đặt các phần mềm sau:
+- **Docker**: Phiên bản mới nhất
+- **Docker Compose**: Phiên bản mới nhất
 
-## Installation and Running Guide
+## Cấu trúc Dự án
+Dự án bao gồm các file và thư mục sau:
+- `docker-compose.yml`: File cấu hình cho Docker Compose
+- `Dockerfile`: File cấu hình để xây dựng hình ảnh Docker cho ứng dụng
+## Cấu trúc Dự án
+Dự án bao gồm các file và thư mục sau:
+- `docker-compose.yml`: File cấu hình cho Docker Compose
+- `Dockerfile`: File cấu hình để xây dựng hình ảnh Docker cho ứng dụng
 
-### Step 1: Download the Source Code
-Clone or download the source code of the project to your local machine using the following command:
+## Hướng dẫn Cài đặt và Chạy
+## Hướng dẫn Cài đặt và Chạy
+
+### Bước 1: Tải Mã Nguồn
+Clone hoặc tải mã nguồn của dự án về máy local của bạn bằng lệnh sau:
+### Bước 1: Tải Mã Nguồn
+Clone hoặc tải mã nguồn của dự án về máy local của bạn bằng lệnh sau:
 
 ```bash
 git clone https://github.com/hepham/openVPNManagement.git
 cd openVPNManagement
 ```
 
-### Step 2: Build and Run the Project
-Open a terminal and navigate to the directory containing the `docker-compose.yml` file. Run the following command to build and start the services:
+### Bước 2: Xây dựng và Chạy Dự án
+Mở terminal và điều hướng đến thư mục chứa file `docker-compose.yml`. Chạy lệnh sau để xây dựng và khởi động các dịch vụ:
+### Bước 2: Xây dựng và Chạy Dự án
+Mở terminal và điều hướng đến thư mục chứa file `docker-compose.yml`. Chạy lệnh sau để xây dựng và khởi động các dịch vụ:
 
 ```bash
 docker-compose up --build -d
 ```
 
-- This command will build the Docker image and start the services in detached mode.
+- Lệnh này sẽ xây dựng hình ảnh Docker và khởi động các dịch vụ ở chế độ detached.
+- Lệnh này sẽ xây dựng hình ảnh Docker và khởi động các dịch vụ ở chế độ detached.
 
-### Step 3: Check the Status
-Once the services are up and running, you can check their status using the following command:
+### Bước 3: Kiểm tra Trạng thái
+Sau khi các dịch vụ đã chạy, bạn có thể kiểm tra trạng thái của chúng bằng lệnh sau:
+### Bước 3: Kiểm tra Trạng thái
+Sau khi các dịch vụ đã chạy, bạn có thể kiểm tra trạng thái của chúng bằng lệnh sau:
 
 ```bash
 docker-compose ps
 ```
 
-### Step 4: Check Logs
-If you need to check logs to monitor the application's activity, you can use the following commands:
+### Bước 4: Kiểm tra Logs
+Nếu bạn cần kiểm tra logs để theo dõi hoạt động của ứng dụng, bạn có thể sử dụng các lệnh sau:
 
-- To view logs for the web service:
+- Để xem logs của dịch vụ web:
+- Để xem logs của dịch vụ web:
   ```bash
   docker-compose logs web
   ```
 
-
-### Step 5: Stop the Services
-When you want to stop the services, you can use the following command:
+### Bước 5: Dừng Các Dịch vụ
+Khi bạn muốn dừng các dịch vụ, bạn có thể sử dụng lệnh sau:
+### Bước 5: Dừng Các Dịch vụ
+Khi bạn muốn dừng các dịch vụ, bạn có thể sử dụng lệnh sau:
 
 ```bash
 docker-compose down
 ```
-## Running the Application Directly
 
-### Option 1: Running with Python
-If you prefer to run the application directly using Python, you can do so with the following command:
+## Chạy Ứng dụng Trực tiếp
+
+### Bước 1: Tạo và Kích hoạt Môi trường Ảo
+
+```bash
+# Tạo môi trường ảo
+python3 -m venv venv
+
+# Kích hoạt môi trường ảo
+# Trên Linux/Mac:
+source venv/bin/activate
+# Trên Windows:
+.\venv\Scripts\activate
+```
+
+### Bước 2: Cài đặt Các Yêu cầu
+
+```bash
+pip install -r requirements.txt
+```
+
+### Bước 3: Chạy Ứng dụng
+
+#### Lựa chọn 1: Chạy với Python
+Nếu bạn muốn chạy ứng dụng trực tiếp bằng Python, bạn có thể thực hiện bằng lệnh sau:
 
 ```bash
 python wsgi.py
 ```
 
-- This will start the Flask application on the default port (usually 4000).
+- Điều này sẽ khởi động ứng dụng Flask trên cổng mặc định (thường là 4000).
+- Điều này sẽ khởi động ứng dụng Flask trên cổng mặc định (thường là 4000).
 
-### Option 2: Running with Gunicorn
-To run the application using Gunicorn, you can use the following command:
+#### Lựa chọn 2: Chạy với Gunicorn
+Để chạy ứng dụng bằng Gunicorn, bạn có thể sử dụng lệnh sau:
 
 ```bash
 gunicorn --bind 0.0.0.0:4000 wsgi:app
 ```
 
-- This will start the application on port 4000.
-## Conclusion
-The openVPNManagement project provides an easy way to set up and manage OpenVPN servers. Follow the steps above to get the project up and running. If you encounter any issues, check the logs or refer to the official documentation for Docker.
+- Điều này sẽ khởi động ứng dụng trên cổng 4000.
+
+## Kết luận
+Dự án OpenVPN Management cung cấp cách dễ dàng để thiết lập và quản lý các máy chủ OpenVPN. Hãy làm theo các bước trên để đưa dự án vào hoạt động. Nếu bạn gặp bất kỳ vấn đề nào, hãy kiểm tra logs hoặc tham khảo tài liệu chính thức của Docker.
+- Điều này sẽ khởi động ứng dụng trên cổng 4000.
+
+## Kết luận
+Dự án OpenVPN Management cung cấp cách dễ dàng để thiết lập và quản lý các máy chủ OpenVPN. Hãy làm theo các bước trên để đưa dự án vào hoạt động. Nếu bạn gặp bất kỳ vấn đề nào, hãy kiểm tra logs hoặc tham khảo tài liệu chính thức của Docker.
