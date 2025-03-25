@@ -48,7 +48,9 @@ class RSARedis:
         keys = self.redis.keys("vpn_user:*")
         users = []
         for key in keys:
-            users.append(self.redis.getall(key))
+            if isinstance(key, bytes):
+                key = key.decode('utf-8')
+            users.append(self.redis.hgetall(key))
         return users
 
 def init_db(app):

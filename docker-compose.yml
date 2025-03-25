@@ -1,4 +1,14 @@
 services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: always
   web:
     build: .
     ports:
@@ -7,11 +17,22 @@ services:
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=production
+      - ADMIN_API_KEY=admin
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - USER_SESSION_TIMEOUT=86400
     volumes:
       - .:/app
     networks:
       - app_network
+    depends_on:
+      - redis
+    restart: always
 
 networks:
   app_network: 
-    driver: bridge  
+    driver: bridge
+
+volumes:
+  redis_data:  
