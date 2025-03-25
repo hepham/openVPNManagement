@@ -63,35 +63,54 @@ def add_server():
     auth_header = request.headers.get('Authorization')
     if not auth_header or auth_header != os.getenv("ADMIN_API_KEY", "admin"):
         return jsonify({"error": "access denied"}), 403
+        
     data = request.json
+    required_fields = ['flag', 'isFree', 'IP', "description", "category"]
+
+    # Kiểm tra các trường bắt buộc
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    # Kiểm tra server với IP đã tồn tại
     existing_server = Server.query.filter_by(IP=data['IP']).first()
-
     if existing_server:
-        return jsonify({'error': 'Server with this IP already exists'}), 400
-    parsed_url = urlparse(data["IP"])
+        return jsonify({'error': f"Server with IP {data['IP']} already exists"}), 400
 
-    ip_address = parsed_url.hostname
-    print(ip_address)
-    metadata = get_meta_data(ip_address)
-    if (metadata == "error"):
-        return jsonify({'error': 'problem get metadata'}), 400
-    new_server = Server(
-        country=metadata['country'],
-        city=data['city'],
-        flag=data['flag'],
-        IP=data["IP"],
-        isFree=data['isFree'],
-        description=data['description'],
-        category=data["category"],
-        latitude=metadata["latitude"],
-        longitude=metadata["longitude"],
-        region=metadata["region"],
-        postal=metadata["postal"],
-        ipAddress=ip_address
-    )
-    db.session.add(new_server)
-    db.session.commit()
-    return jsonify({'message': 'Server added successfully'}), 201
+    try:
+        # Parse URL và lấy IP address
+        parsed_url = urlparse(data["IP"])
+        ip_address = parsed_url.hostname
+        if not ip_address:
+            return jsonify({'error': 'Invalid IP address format'}), 400
+
+        # Lấy metadata
+        metadata = get_meta_data(ip_address)
+        if metadata == "error":
+            return jsonify({'error': 'Problem getting metadata'}), 400
+
+        # Tạo server mới
+        new_server = Server(
+            country=metadata['country'],
+            city=metadata['city'],
+            flag=data['flag'],
+            IP=data["IP"],
+            isFree=data['isFree'],
+            description=data['description'],
+            category=data["category"],
+            latitude=metadata["latitude"],
+            longitude=metadata["longitude"],
+            region=metadata["region"],
+            postal=metadata["postal"],
+            ipAddress=ip_address
+        )
+
+        db.session.add(new_server)
+        db.session.commit()
+        return jsonify({'message': 'Server added successfully'}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 
 @server_bp.route('/server/list', methods=['POST'])
