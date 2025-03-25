@@ -46,7 +46,7 @@ sequenceDiagram
     VPNManager->>VPNManager: Giải mã thông tin người dùng
     VPNManager->>VPNServer: Yêu cầu cấu hình WireGuard
     VPNServer->>VPNManager: Cấu hình WireGuard
-    VPNManager->>VPNManager: Mã hóa thông tin nhạy cảm
+    VPNManager->>VPNManager: Mã hóa thông tin
     VPNManager->>Client: Cấu hình VPN đã mã hóa
 ```
 
@@ -205,6 +205,127 @@ POST /config
 
 **Mã trạng thái:** 200 OK
 
+#### 5. Danh sách Server (Admin)
+```
+GET /admin/listServer
+```
+
+**Mô tả:** Trả về danh sách tất cả các máy chủ VPN có sẵn không mã hóa (chỉ dành cho admin).
+
+**Headers:**
+```
+Authorization: admin
+```
+
+**Phản hồi thành công:**
+```json
+{
+  "message": [
+    {
+      "id": 1,
+      "IP": "https://example.com",
+      "country": "Vietnam",
+      "city": "Ho Chi Minh",
+      "flag": "vn.png",
+      "isFree": true,
+      "category": "Free",
+      "description": "Server VPN tại Việt Nam",
+      "latitude": "10.762622",
+      "longitude": "106.660172",
+      "region": "Ho Chi Minh City",
+      "postal": "70000"
+    }
+  ]
+}
+```
+
+**Mã trạng thái:** 200 OK
+
+**Mã lỗi:**
+- 403 Forbidden: Nếu API key không chính xác hoặc không được cung cấp
+
+**Cách sử dụng:**
+```bash
+curl -H "Authorization: admin" http://ip_server:4000/admin/listServer
+```
+
+#### 6. Xóa Server Theo ID
+```
+DELETE /server/{id}
+```
+
+**Mô tả:** Xóa một máy chủ VPN dựa trên ID của nó.
+
+**Tham số URL:**
+- `id`: ID của server cần xóa
+
+**Headers:**
+```
+Authorization: admin
+```
+
+**Phản hồi thành công:**
+```json
+{
+  "message": "Server deleted successfully"
+}
+```
+
+**Mã trạng thái:** 200 OK
+
+**Cách sử dụng:**
+```bash
+curl -X DELETE -H "Authorization: admin" http://localhost:4000/server/1
+```
+
+**Lưu ý bảo mật:**
+- API này chỉ nên được sử dụng bởi người quản trị
+- Hành động xóa là không thể hoàn tác, hãy cẩn thận khi sử dụng
+
+#### 7. Xóa Server Theo IP
+```
+DELETE /server/ip
+```
+
+**Mô tả:** Xóa một máy chủ VPN dựa trên địa chỉ IP của nó.
+
+
+**Body:**
+```json
+{
+  "ip": "http://3.139.50.2:10086"
+}
+```
+
+**Headers:**
+```
+Authorization: admin
+Content-Type: application/json
+```
+
+**Phản hồi thành công:**
+```json
+{
+  "message": "Server deleted successfully"
+}
+```
+
+**Mã trạng thái:** 200 OK
+
+**Mã lỗi:**
+- 400 Bad Request: Nếu không cung cấp IP trong request body
+- 404 Not Found: Nếu không tìm thấy server với IP được chỉ định
+- 500 Internal Server Error: Nếu xảy ra lỗi trong quá trình xóa
+
+**Cách sử dụng:**
+```bash
+curl -X DELETE -H "Content-Type: application/json" -H "Authorization: admin" -d '{"IP": "http://3.139.50.2:10086"}' http://ip_server:4000/server/ip
+```
+
+**Lưu ý:**
+- API này là một phương pháp thay thế để xóa server khi bạn biết địa chỉ IP nhưng không biết ID
+- Địa chỉ IP phải khớp chính xác với giá trị được lưu trong cơ sở dữ liệu
+
 ## Quy trình sử dụng
 
 ### Bước 1: Khởi tạo kết nối an toàn
@@ -221,14 +342,14 @@ POST /config
 2. Sử dụng public key từ bước 1 để mã hóa chuỗi này
 3. Gọi API `POST /config` với thông tin đã mã hóa, public key và tên người dùng
 4. Nhận cấu hình WireGuard đã mã hóa từ server
-5. Giải mã thông tin nhạy cảm sử dụng khóa RSA
+5. Giải mã thông tin sử dụng khóa RSA
 6. Sử dụng cấu hình WireGuard để thiết lập kết nối VPN
 
 ## Cơ chế bảo mật
 
 Hệ thống sử dụng kết hợp hai cơ chế mã hóa:
 
-1. **Mã hóa RSA**: Sử dụng cho việc truyền thông tin nhạy cảm từ client đến server
+1. **Mã hóa RSA**: Sử dụng cho việc truyền thông tin  từ client đến server
    - Độ dài khóa: 2048 bit
    - Client sử dụng public key của server để mã hóa
    - Server sử dụng private key để giải mã

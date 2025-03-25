@@ -9,8 +9,17 @@ from urllib.parse import urlparse
 from services.server_services import get_meta_data
 import json
 import re
+import os
 server_bp = Blueprint('server_bp', __name__)
 
+@server_bp.route('/admin/listServer', methods=['GET'])
+def get_servers_admin():
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or auth_header != os.getenv("ADMIN_API_KEY", "admin"):
+        return jsonify({"error": "access denied"}), 403
+    servers = Server.query.all()
+    server_list = _build_server_list(servers)
+    return jsonify({"message": server_list}), 200
 
 @server_bp.route('/listServer', methods=['GET'])
 def get_servers():
@@ -51,6 +60,9 @@ def _build_server_list(servers):
 
 @server_bp.route('/server', methods=['POST'])
 def add_server():
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or auth_header != os.getenv("ADMIN_API_KEY", "admin"):
+        return jsonify({"error": "access denied"}), 403
     data = request.json
     existing_server = Server.query.filter_by(IP=data['IP']).first()
 
@@ -84,6 +96,9 @@ def add_server():
 
 @server_bp.route('/server/list', methods=['POST'])
 def add_server_list():
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or auth_header != os.getenv("ADMIN_API_KEY", "admin"):
+        return jsonify({"error": "access denied"}), 403
     data = request.json
 
     # Check that the input data is a list
@@ -141,6 +156,9 @@ def add_server_list():
 
 @server_bp.route('/server/<int:id>', methods=['DELETE'])
 def delete_server(id):
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or auth_header != os.getenv("ADMIN_API_KEY", "admin"):
+        return jsonify({"error": "access denied"}), 403
     server = Server.query.get_or_404(id)
     db.session.delete(server)
     db.session.commit()
@@ -149,6 +167,9 @@ def delete_server(id):
 
 @server_bp.route('/server/ip', methods=['DELETE'])
 def delete_server_by_ip():
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or auth_header != os.getenv("ADMIN_API_KEY", "admin"):
+        return jsonify({"error": "access denied"}), 403
     data = request.json
     ip = data.get('ip')
 
@@ -167,6 +188,9 @@ def delete_server_by_ip():
 
 @server_bp.route('/server/ip', methods=['PUT'])
 def update_server_ip():
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or auth_header != os.getenv("ADMIN_API_KEY", "admin"):
+        return jsonify({"error": "access denied"}), 403
     data = request.json
     old_ip = data.get('old_ip')
     new_ip = data.get('new_ip')
